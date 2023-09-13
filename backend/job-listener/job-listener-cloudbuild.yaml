@@ -1,0 +1,40 @@
+substitutions:
+  _PROJECT_ID: YOUR_PROJECT_ID
+  _REGION: YOUR_REGION
+  _CLOUD_FUNCTION_NAME: YOUR_CLOUD_FUNCTION_NAME
+  _TOPIC_NAME: YOUR_TOPIC_NAME
+  _SERVICE_ACCOUNT_EMAIL: YOUR_SERVICE_ACCOUNT_EMAIL
+  _TEMPLATE_PATH: YOUR_TEMPLATE_PATH_GCS_BUCKET_URL
+  _PIPELINE_ROOT: YOUR_PIPELINE_ROOT_GCS_BUCKET_URL
+
+steps:
+  # Step 1: Activate the service account
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud auth activate-service-account --key-file=YOUR_SERVICE_ACCOUNT_KEY.json
+
+  # Step 2: Deploy the Cloud Function
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'functions'
+      - 'deploy'
+      - $_CLOUD_FUNCTION_NAME
+      - '--runtime=python311'
+      - '--gen2'
+      - '--trigger-topic=$_TOPIC_NAME'
+      - '--entry-point=subscribe'
+      - '--project=$_PROJECT_ID'
+      - '--region=$_REGION'
+      - '--source=.'
+      - '--service-account=$_SERVICE_ACCOUNT_EMAIL'
+      - '--update-env-vars'
+      - 'TEMPLATE_PATH=$_TEMPLATE_PATH'
+      - '--update-env-vars'
+      - 'PIPELINE_ROOT=$_PIPELINE_ROOT'
+      - '--update-env-vars'
+      - 'PROJECT_ID=$_PROJECT_ID'
+      - '--update-env-vars'
+      - 'REGION=$_REGION'
